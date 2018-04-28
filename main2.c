@@ -161,9 +161,9 @@ void Adc_init()
     ADCON0bits.ADON=1;   // модуль АЦП включен
      }
 
-int read_Adc()
+int read_Adc(unsigned char channel)
     {
-    ADCON0bits.CHS=7; // выбор аналогового канала
+    ADCON0bits.CHS=channel; // выбор аналогового канала
     ADCON0bits.GO_DONE=1; // запуск преобразования
     while(ADCON0bits.GO_DONE==1);     
     return (ADRESH<<2)+(ADRESL>>6);//запись результата преобразования
@@ -175,11 +175,11 @@ int main(int argc, char** argv)
 {
 
 Adc_init();
-lcd_init();  
+lcd_init(); 
             
 while(1)
     {    
-    inttolcd(0x80,read_Adc());
+    inttolcd(0x80,read_Adc(7));
     }        
 return;
 }
