@@ -174,7 +174,6 @@ __delay_ms(1);
 void motor_init()
 {
 TRISDbits.RD0=0;
-23
 TRISDbits.RD1=0;
 TRISBbits.RB1=0;
 TRISBbits.RB2=0;
@@ -193,23 +192,23 @@ T2CONbits.TMR2ON=1;// включение модуля Timer2
 void motor_a_change_Speed (signed char speed)
 {
 if (speed>0) // движение вперёд
-{
-CCPR1L=speed;
-PORTDbits.RD0=0;
-PORTDbits.RD1=1;
-}
+    {
+    CCPR1L=speed;
+    PORTDbits.RD0=0;
+    PORTDbits.RD1=1;
+    }
 else if (speed<0) // движение назад
-{
-CCPR1L =-speed;
-PORTDbits.RD0=1;
-PORTDbits.RD1=0;
-}
+    {
+    CCPR1L =-speed;
+    PORTDbits.RD0=1;
+    PORTDbits.RD1=0;
+    }
 else //остановка
-{
-CCPR1L=0;
-PORTDbits.RD0=0;
-PORTDbits.RD1=0;
-}
+    {
+    CCPR1L=0;
+    PORTDbits.RD0=0;
+    PORTDbits.RD1=0;
+    }
 }
 
 void main(void)
@@ -221,7 +220,7 @@ void main(void)
    lcd_init();
    while(1)
    {
-   speed=read_Adc(7);
+   speed=read_Adc(7)/9;
    inttolcd(0x80,speed);
    motor_a_change_Speed(speed);
    }
