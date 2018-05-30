@@ -1,8 +1,8 @@
 /*
- * File:   main3.c
+ * File:   main4.c
  * Author: user
  *
- * Created on 4 мая 2018 г., 18:15
+ * Created on 30 мая 2018 г., 17:02
  */
 
 
@@ -78,9 +78,27 @@
 #define LCD_RS PORTDbits.RD2
 #define LCD_Data4 LATD // инициализация портов D4-D7 LCD
 
-int t1me=0;
-unsigned char pr1nt=1;
-unsigned char stp=1;
+
+void Adc_init()
+    {
+    TRISA|=0b00101111; //перевод выводов RA0, RA1, RA2, RA3, RA5 в режим входов
+    TRISE|=0b00000111; //перевод выводов RE0, RE1, RE2 в режим входов
+    ADCON1bits.PCFG=0b0111; // конфигурация аналого-цифровых портов
+    ADCON1bits.VCFG=0b00; // опорное напряжение Vss Vdd
+    ADCON2bits.ACQT=0b111;// время преобразования 20 Tad
+    ADCON2bits.ADCS=0b110;// частота преобразования Fosc/64
+    ADCON2bits.ADFM=0;//левое смещение
+    ADCON0bits.ADON=1;   // модуль АЦП включен
+     }
+
+int read_Adc(char channel)
+    {
+    ADCON0bits.CHS=channel; // выбор аналогового канала
+    ADCON0bits.GO_DONE=1; // запуск преобразования
+    while(ADCON0bits.GO_DONE==1);     
+    return (ADRESH<<2)+(ADRESL>>6);//запись результата преобразования
+    }
+
 
 void lcd_clk(void) /*генерация импульса на вход EN*/
 {
@@ -155,7 +173,7 @@ __delay_ms(1);
 
 void motor_init()
 {
-TRISDbits.RD0=0; 
+TRISDbits.RD0=0;
 23
 TRISDbits.RD1=0;
 TRISBbits.RB1=0;
@@ -173,56 +191,38 @@ T2CONbits.TMR2ON=1;// включение модуля Timer2
 }
 
 void motor_a_change_Speed (signed char speed)
- {
- if (speed>0) // движение вперёд
- {
- CCPR1L=speed;
- PORTDbits.RD0=0;
- PORTDbits.RD1=1;
- }
- else if (speed<0) // движение назад
- {
- CCPR1L =-speed;
- PORTDbits.RD0=1;
- PORTDbits.RD1=0;
- }
- else //остановка
- {
- CCPR1L=0;
- PORTDbits.RD0=0;
- PORTDbits.RD1=0;
- }
+{
+if (speed>0) // движение вперёд
+{
+CCPR1L=speed;
+PORTDbits.RD0=0;
+PORTDbits.RD1=1;
+}
+else if (speed<0) // движение назад
+{
+CCPR1L =-speed;
+PORTDbits.RD0=1;
+PORTDbits.RD1=0;
+}
+else //остановка
+{
+CCPR1L=0;
+PORTDbits.RD0=0;
+PORTDbits.RD1=0;
+}
 }
 
-
-void Adc_init()
-    {
-    TRISA|=0b00101111; //перевод выводов RA0, RA1, RA2, RA3, RA5 в режим входов
-    TRISE|=0b00000111; //перевод выводов RE0, RE1, RE2 в режим входов
-    ADCON1bits.PCFG=0b0111; // конфигурация аналого-цифровых портов
-    ADCON1bits.VCFG=0b00; // опорное напряжение Vss Vdd
-    ADCON2bits.ACQT=0b111;// время преобразования 20 Tad
-    ADCON2bits.ADCS=0b110;// частота преобразования Fosc/64
-    ADCON2bits.ADFM=0;//левое смещение
-    ADCON0bits.ADON=1;   // модуль АЦП включен
-     }
-
-int read_Adc(char channel)
-    {
-    ADCON0bits.CHS=channel; // выбор аналогового канала
-    ADCON0bits.GO_DONE=1; // запуск преобразования
-    while(ADCON0bits.GO_DONE==1);     
-    return (ADRESH<<2)+(ADRESL>>6);//запись результата преобразования
-    }
-
-
-
-void main(void) {   
-   
+void main(void)
+{
+   signed char speed=0; 
     
-    
-    
-    
-    
-    while(1);   
-}   
+   motor_init();
+   Adc_init();
+   lcd_init();
+   while(1)
+   {
+   speed=read_Adc(7);
+   inttolcd(0x80,speed);
+   motor_a_change_Speed(speed);
+   }
+}
