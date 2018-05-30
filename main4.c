@@ -189,26 +189,15 @@ T2CONbits.T2CKPS=0b00; //задаём предделитель модуля Time
 T2CONbits.TMR2ON=1;// включение модуля Timer2
 }
 
-void motor_a_change_Speed (signed char speed)
+void move (void)
 {
-if (speed>0) // движение вперёд
-    {
-    CCPR1L=speed;
-    PORTDbits.RD0=0;
-    PORTDbits.RD1=1;
-    }
-else if (speed<0) // движение назад
-    {
-    CCPR1L =-speed;
+    CCPR1L=124;
+    CCPR2L=124;
     PORTDbits.RD0=1;
-    PORTDbits.RD1=0;
-    }
-else //остановка
-    {
-    CCPR1L=0;
-    PORTDbits.RD0=0;
-    PORTDbits.RD1=0;
-    }
+    PORTDbits.RD1=0;   
+    
+    PORTBbits.RB2=0;    
+    PORTBbits.RB1=1; 
 }
 
 void main(void)
@@ -218,10 +207,9 @@ void main(void)
    motor_init();
    Adc_init();
    lcd_init();
+   move();
    while(1)
    {
-   speed=read_Adc(7)/9;
-   inttolcd(0x80,speed);
-   motor_a_change_Speed(speed);
+     
    }
 }
