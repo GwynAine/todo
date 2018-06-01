@@ -189,37 +189,32 @@ T2CONbits.T2CKPS=0b00; //задаём предделитель модуля Time
 T2CONbits.TMR2ON=1;// включение модуля Timer2
 }
 
-void straight (void)
+void move (int dif)
 {
-    CCPR1L=124;
-    CCPR2L=124;
+    if (dif>0)
+        {
+        CCPR1L=124;
+        CCPR2L=124/dif;
+        inttolcd(0xc0+5,124/dif);
+        }
+    else if (dif<0)
+        {
+        CCPR1L=-124/dif;
+        CCPR2L=124;
+        inttolcd(0xc0+5,-124/dif);
+        }
+    else
+        {
+        CCPR1L=124;
+        CCPR2L=124;
+        }
+    
+    
     PORTDbits.RD0=1;
     PORTDbits.RD1=0;   
     
     PORTBbits.RB2=0;    
     PORTBbits.RB1=1; 
-}
-
-void left (void)
-{
-    CCPR1L=124;
-    CCPR2L=124;
-    PORTDbits.RD0=0;
-    PORTDbits.RD1=1;   
-    
-    PORTBbits.RB2=0;    
-    PORTBbits.RB1=1; 
-}
-
-void right (void)
-{
-    CCPR1L=124;
-    CCPR2L=124;
-    PORTDbits.RD0=1;
-    PORTDbits.RD1=0;   
-    
-    PORTBbits.RB2=1;    
-    PORTBbits.RB1=0; 
 }
 
 void main(void)
@@ -234,12 +229,8 @@ void main(void)
         inttolcd(0x83,read_Adc(0)); //180 473 963
         inttolcd(0x87,read_Adc(1));
         inttolcd(0xc0,read_Adc(2));
-       if(read_Adc(0)<700)
-           left();
-       else if
-         (read_Adc(1)<700)
-           right();
-       else
-           straight();
+       
+        move((read_Adc(0)-read_Adc(1))/6);
+        
     }
 }
